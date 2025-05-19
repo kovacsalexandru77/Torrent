@@ -1,0 +1,47 @@
+
+name: ItorrentMagnet
+description: Magyar filmek itorrent.ws oldalról, közvetlen magnet lejátszással.
+language: hu
+domains: ["itorrent.ws"]
+nsfw: false
+tvTypes: ["Movie"]
+
+mainScraper: |-
+  module.exports = async function ({ axios, cheerio }) {
+    const base = "https://itorrent.ws";
+    const search = async (query) => {
+      const res = await axios.get(`${base}/?search=${encodeURIComponent(query)}`);
+      const $ = cheerio.load(res.data);
+      const results = [];
+
+      $("div.box_news_content").each((i, el) => {
+        const title = $(el).find("h3").text().trim();
+        const href = $(el).find("a").attr("href");
+        const poster = $(el).find("img").attr("src");
+
+        if (href && title) {
+          results.push({
+            title,
+            url: base + href,
+            poster: poster?.startsWith("http") ? poster : base + "/" + poster,
+          });
+        }
+      });
+
+      return results;
+    };
+
+    const load = async (url) => {
+      const res = await axios.get(url);
+      const $ = cheerio.load(res.data);
+      const magnet = $('a[href^="magnet:?xt"]').attr("href");
+
+      return {
+        streamingLinks: magnet
+          ? [{ url: magnet, quality: "1080p", isTorrent: true }]
+          : [],
+      };
+    };
+
+    return { search, load };
+  };
