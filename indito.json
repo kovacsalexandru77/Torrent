@@ -3,10 +3,6 @@
   "description": "Magnet linkek kinyerése az iTorrent magyar filmekhez",
   "manifestVersion": 1,
   "pluginLists": [
-    {
-      "name": "iTorrentMagnet",
-      "url": "https://raw.githubusercontent.com/kovacsalexandru77/Torrent/main/ItorrentMagnet.cs3",
-      "type": "media"
-    }
+    "https://raw.githubusercontent.com/kovacsalexandru77/Torrent/refs/heads/main/repo.json"
   ]
 }
