@@ -1,47 +1,36 @@
+// ItorrentMagnet.cs3
+// Csak példakód – még bővíthető
 
-name: ItorrentMagnet
-description: Magyar filmek itorrent.ws oldalról, közvetlen magnet lejátszással.
-language: hu
-domains: ["itorrent.ws"]
-nsfw: false
-tvTypes: ["Movie"]
+package itorrent
 
-mainScraper: |-
-  module.exports = async function ({ axios, cheerio }) {
-    const base = "https://itorrent.ws";
-    const search = async (query) => {
-      const res = await axios.get(`${base}/?search=${encodeURIComponent(query)}`);
-      const $ = cheerio.load(res.data);
-      const results = [];
+import com.lagradost.cloudstream3.*
+import com.lagradost.cloudstream3.utils.*
 
-      $("div.box_news_content").each((i, el) => {
-        const title = $(el).find("h3").text().trim();
-        const href = $(el).find("a").attr("href");
-        const poster = $(el).find("img").attr("src");
+class ItorrentMagnet : MainAPI() {
+    override var mainUrl = "https://itorrent.ws"
+    override var name = "iTorrent Magnet"
+    override val hasMainPage = true
+    override val hasQuickSearch = false
+    override val supportedTypes = setOf(TvType.Movie)
 
-        if (href && title) {
-          results.push({
-            title,
-            url: base + href,
-            poster: poster?.startsWith("http") ? poster : base + "/" + poster,
-          });
+    override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
+        val doc = app.get(mainUrl).document
+        val movies = doc.select(".movies-list .ml-item").mapNotNull {
+            val href = it.selectFirst("a")?.attr("href") ?: return@mapNotNull null
+            val title = it.selectFirst("a")?.attr("title") ?: "Névtelen"
+            val poster = it.selectFirst("img")?.attr("data-original")
+            newMovieSearchResponse(title, href) {
+                this.posterUrl = poster
+            }
         }
-      });
+        return newHomePageResponse(listOf(HomePageList("Magyar filmek", movies)))
+    }
 
-      return results;
-    };
-
-    const load = async (url) => {
-      const res = await axios.get(url);
-      const $ = cheerio.load(res.data);
-      const magnet = $('a[href^="magnet:?xt"]').attr("href");
-
-      return {
-        streamingLinks: magnet
-          ? [{ url: magnet, quality: "1080p", isTorrent: true }]
-          : [],
-      };
-    };
-
-    return { search, load };
-  };
+    override suspend fun load(url: String): LoadResponse {
+        val doc = app.get(url).document
+        val title = doc.selectFirst("title")?.text() ?: "Film"
+        val magnet = doc.select("a[href^=magnet:]").firstOrNull()?.attr("href")
+            ?: throw ErrorLoadingException("Nincs magnet link")
+        return newMovieLoadResponse(title, url, TvType.Movie, listOf(ExtractorLink("iTorrent", "Magnet", magnet, "", Qualities.Unknown)))
+    }
+}
