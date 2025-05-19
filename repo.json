@@ -1,0 +1,19 @@
+[
+  {
+    "iconUrl": "https://ia601901.us.archive.org/27/items/aaa_20250423/aaa.png",
+    "apiVersion": 1,
+    "repositoryUrl": "https://github.com/kovacsalexandru77/Torrent",
+    "status": 1,
+    "authors": [
+      "sandu"
+    ],
+    "tvTypes": [
+      "Movie"
+    ],
+    "version": 1,
+    "internalName": "ItorrentMagnet",
+    "description": "iTorrent Magnet repo for CloudStream",
+    "url": "https://raw.githubusercontent.com/kovacsalexandru77/Torrent/main/ItorrentMagnet.cs3",
+    "name": "iTorrentMagnet"
+  }
+]
