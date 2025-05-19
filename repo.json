@@ -1,0 +1,12 @@
+{
+  "name": "ItorrentMagnet Repo",
+  "description": "Bővítmény az itorrent magnet lejátszáshoz",
+  "manifestVersion": 1,
+  "pluginLists": [
+    {
+      "name": "ItorrentMagnet",
+      "description": "Itorrent magnet támogatás",
+      "url": "https://raw.githubusercontent.com/kovacsalexandru77/Torrent/refs/heads/main/ItorrentMagnet.cs3"
+    }
+  ]
+}
