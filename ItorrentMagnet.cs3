@@ -1,6 +1,4 @@
-// ItorrentMagnet.cs3
-// Csak példakód – még bővíthető
-
+kotlin
 package itorrent
 
 import com.lagradost.cloudstream3.*
@@ -20,7 +18,7 @@ class ItorrentMagnet : MainAPI() {
             val title = it.selectFirst("a")?.attr("title") ?: "Névtelen"
             val poster = it.selectFirst("img")?.attr("data-original")
             newMovieSearchResponse(title, href) {
-                this.posterUrl = poster
+                this.posterUrl = poster?.takeIf { isValidImageUrl(it) } ?: "default_poster_url.jpg" // Default poster if invalid
             }
         }
         return newHomePageResponse(listOf(HomePageList("Magyar filmek", movies)))
@@ -30,7 +28,16 @@ class ItorrentMagnet : MainAPI() {
         val doc = app.get(url).document
         val title = doc.selectFirst("title")?.text() ?: "Film"
         val magnet = doc.select("a[href^=magnet:]").firstOrNull()?.attr("href")
-            ?: throw ErrorLoadingException("Nincs magnet link")
-        return newMovieLoadResponse(title, url, TvType.Movie, listOf(ExtractorLink("iTorrent", "Magnet", magnet, "", Qualities.Unknown)))
+            ?: throw ErrorLoadingException("Nincs magnet link a megadott filmen.")
+
+        // Optional: Kiegészítő információk kinyerése
+        val description = doc.select("description_selector").firstOrNull()?.text() ?: "Nincs leírás elérhető."
+        
+        return newMovieLoadResponse(title, url, TvType.Movie, listOf(ExtractorLink("iTorrent", "Magnet", magnet, description, Qualities.Unknown)))
+    }
+
+    private fun isValidImageUrl(url: String): Boolean {
+        // Egyszerű ellenőrzés a kép URL validálására
+        return url.endsWith(".jpg")  url.endsWith(".png")  url.endsWith(".jpeg")
     }
 }
